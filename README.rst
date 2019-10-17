@@ -3,8 +3,6 @@ Sphinx pywave extension
 
 A sphinx extension that allows including pywave diagrams by using its text-based representation
 
-pywave online editor and tutorial: http://pywave.com/
-
 .. image:: https://travis-ci.org/LudwigCRON/sphinx-pywave.svg?branch=master
 	:target: https://travis-ci.org/LudwigCRON/sphinx-pywave
 
