@@ -6,7 +6,7 @@ requires = ['Sphinx>=1.8',
             'pywave>=0.0.3;python_version>="3.5"']
 
 setup(
-    name='sphinxcontrib-wavedrom',
+    name='sphinxcontrib-pywave',
     use_scm_version={
         "relative_to": __file__,
         "write_to": "sphinxcontrib/version.py",

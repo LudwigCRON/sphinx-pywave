@@ -19,7 +19,7 @@ Intro
 Step 1. The Signal
 ==================
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [{ "name": "Alfa", "wave": "01.zx=ud.23.45" }] }
 
@@ -27,7 +27,7 @@ Step 1. The Signal
 Step 2. Adding Clock
 ====================
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 	  	{ "name": "pclk", "wave": "p......." },
@@ -46,7 +46,7 @@ Step 2. Adding Clock
 Step 3. Putting all together
 ============================
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 	  	{ "name": "clk",  "wave": "P......" },
@@ -58,7 +58,7 @@ Step 3. Putting all together
 Step 4. Spacers and Gaps
 ========================
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 	  	{ "name": "clk",         "wave": "p.....|..." },
@@ -72,7 +72,7 @@ Step 4. Spacers and Gaps
 Step 5. The groups
 ==================
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 	  	{    "name": "clk",   "wave": "p..Pp..P"},
@@ -97,7 +97,7 @@ Step 5. The groups
 Step 6. Period and Phase
 ========================
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 	  	{ "name": "CK",   "wave": "P.......",                                              "period": 2  },
@@ -114,7 +114,7 @@ Step 7.The config{} property
 Hscale=1
 ========
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 	  	{ "name": "clk",     "wave": "p...." },
@@ -127,7 +127,7 @@ Hscale=1
 Hscale=2
 ========
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 	  	{ "name": "clk",     "wave": "p...." },
@@ -140,7 +140,7 @@ Hscale=2
 Hscale=3
 ========
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 	  	{ "name": "clk",     "wave": "p...." },
@@ -153,7 +153,7 @@ Hscale=3
 Head, foot, tock, text
 ======================
 
-.. pywave::
+.. pywave:: jsonml
 
 	{"signal": [
 	  	{"name":"clk",         "wave": "p...." },
@@ -173,7 +173,7 @@ Head, foot, tock, text
 H1, h2, h3, h4, h5, h6, muted, warning, error, info, success
 ============================================================
 
-.. pywave::
+.. pywave:: jsonml
 
 	{"signal": [
 	  	{"name":"clk", "wave": "p.....PPPPp...." },
@@ -212,7 +212,7 @@ Step 8. Arrows
 Splines
 =======
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 		{ "name": "A", "wave": "01........0....",  "node": ".a........j" },
@@ -230,7 +230,7 @@ Splines
 Sharp lines
 ===========
 
-.. pywave::
+.. pywave:: jsonml
 
 	{ "signal": [
 		{ "name": "A", "wave": "01..0..",  "node": ".a..e.." },
@@ -261,12 +261,12 @@ Step 11. Figure
 Register
 ========
 
-.. pywave::
+.. pywave:: jsonml-reg
 
   { "reg": [
     { "name": "IPO",   "bits": 8, "attr": "RO" },
     {                  "bits": 7 },
-    { "name": "BRK",   "bits": 5, "attr": "RW", "type": 1 },
+    { "name": "BRK",   "bits": 5, "attr": "RW", "type": 3 },
     { "name": "CPK",   "bits": 1 },
     { "name": "Clear", "bits": 3 },
     { "bits": 8 }

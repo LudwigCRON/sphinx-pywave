@@ -5,6 +5,8 @@ import os
 from os import path
 from uuid import uuid4
 
+import distutils.spawn
+
 from docutils import nodes
 from docutils.parsers.rst import directives
 from docutils.parsers.rst.directives.images import Image
@@ -14,8 +16,18 @@ from sphinx.util.fileutil import copy_asset_file
 from sphinx.locale import __
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.i18n import search_image_for_language
-from executor import sh_exec
+from .executor import sh_exec
 
+import json
+
+# This exception was not always available..
+try:
+    from json.decoder import JSONDecodeError
+except ImportError:
+    JSONDecodeError = ValueError
+
+# pywave module
+import pywave
 
 # find the pywave tool in path
 PYWAVE_CMD = "pywave -f %s -i '%s' -o '%s'"
@@ -44,35 +56,45 @@ class PywaveDirective(Image, SphinxDirective):
     has_content = True
 
     def run(self):
-        filename = None
-        if self.arguments:
-            # Read code from file
-            document = self.state.document
-            if self.content:
-                return [document.reporter.warning(
-                    __('wavedrom directive cannot have both content and '
-                       'a filename argument'), line=self.lineno)]
-            argument = search_image_for_language(self.arguments[0], self.env)
-            rel_filename, filename = self.env.relfn2path(argument)
-            self.env.note_dependency(rel_filename)
-            if not os.path.exists(filename):
-                return [document.reporter.warning(
-                    __('External wavedrom json file %r not found or reading '
-                       'it failed') % filename, line=self.lineno)]
-        else:
-            # Read code from given content
-            code = "\n".join(self.content)
-            if not code.strip():
-                return [self.state_machine.reporter.warning(
-                    __('Ignoring "wavedrom" directive without content.'),
-                    line=self.lineno)]
-            # store into a temporary file
-            filename = "tmp-%s.jsonml" % uuid4()
-            with open(filename, "w+") as fp:
-                fp.write(code)
 
         # Store code in a special docutils node and pick up at rendering
         node = pywavenode()
+        node['is_reg'] = False
+
+        code_from_file, filename = False, None
+        # get code format or the filename
+        if self.arguments:
+            # is not a file
+            if not "." in self.arguments[0]:
+                print("-" in self.arguments[0], self.arguments)
+                if "-" in self.arguments[0]:
+                    t = self.arguments[0].split("-", 2)
+                    node['input_format'], node['is_reg'] = t[0], "reg" in t[1].lower()
+                else:
+                    node['input_format'] = self.arguments[0]
+            else:
+                code_from_file = True
+                # Read code from file
+                document = self.state.document
+                if self.content:
+                    return [document.reporter.warning(
+                        __('wavedrom directive cannot have both content and '
+                        'a filename argument'), line=self.lineno)]
+                argument = search_image_for_language(self.arguments[0], self.env)
+                rel_filename, filename = self.env.relfn2path(argument)
+                self.env.note_dependency(rel_filename)
+                if not os.path.exists(filename):
+                    return [document.reporter.warning(
+                        __('External wavedrom json file %r not found or reading '
+                        'it failed') % filename, line=self.lineno)]
+        # store the code inlined into a file
+        if self.content and not code_from_file:
+            # store into a temporary file
+            filename = "/tmp/pywave-%s.%s" % (
+                uuid4(), node["input_format"] if node.has_key("input_format") else "jsonml")
+            with open(filename, "w+") as fp:
+                for line in self.content:
+                    fp.write(line + '\n')
 
         node['file'] = filename
         wd_node = node # point to the actual pywave node
@@ -83,7 +105,7 @@ class PywaveDirective(Image, SphinxDirective):
             node = figure_wrapper(self, wd_node, caption)
             self.add_name(node)
 
-        # remove generated file 
+        # remove generated file
         if not self.arguments:
             if os.path.exists(filename):
                 os.remove(filename)
@@ -117,19 +139,19 @@ def render_pywave(self, node, outpath, bname, file_format):
 
     # Try to convert node, raise error with code on failure
     try:
-        svgout = render(node["code"])
+        if not os.path.exists(outpath):
+            os.makedirs(outpath)
+
+        # SVG can be directly written and is supported on all versions
+        if file_format == 'image/svg+xml':
+            fname = "{}.{}".format(bname, "svg")
+            fpath = os.path.join(outpath, fname)
+            # input_path: str, output_path: str, file_format: str, is_reg: bool = False, dpi: float = 150.0
+            pywave.waveform.cli_main(
+                node['file'], fpath, "svg", node['is_reg'])
+            return fname
     except JSONDecodeError as e:
         raise SphinxError("Cannot render the following json code: \n{} \n\nError: {}".format(node['code'], e))
-
-    if not os.path.exists(outpath):
-        os.makedirs(outpath)
-
-    # SVG can be directly written and is supported on all versions
-    if file_format == 'image/svg+xml':
-        fname = "{}.{}".format(bname, "svg")
-        fpath = os.path.join(outpath, fname)
-        sh_exec(PYWAVE_CMD % ("svg", , fpath))
-        return fname
 
     # It gets a bit ugly, if the output does not support svg. We use cairosvg, because it is the easiest
     # to use (no dependency on installed programs). But it only works for Python 3.
@@ -142,13 +164,13 @@ def render_pywave(self, node, outpath, bname, file_format):
     if file_format == 'application/pdf':
         fname = "{}.{}".format(bname, "pdf")
         fpath = os.path.join(outpath, fname)
-        sh_exec(PYWAVE_CMD % ("cairo-pdf", , fpath))
+        sh_exec(PYWAVE_CMD % ("cairo-pdf", "", fpath))
         return fname
 
     if file_format == 'image/png':
         fname = "{}.{}".format(bname, "png")
         fpath = os.path.join(outpath, fname)
-        sh_exec(PYWAVE_CMD % ("cairo-png", , fpath))
+        sh_exec(PYWAVE_CMD % ("cairo-png", "", fpath))
         return fname
 
     raise SphinxError("No valid wavedrom conversion supplied")
