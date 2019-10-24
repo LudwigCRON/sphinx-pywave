@@ -2,11 +2,10 @@ from setuptools import setup, find_packages
 
 project_url = 'https://github.com/LudwigCRON/sphinx-pywave'
 
-requires = ['Sphinx>=1.8',
-            'pywave>=0.0.3;python_version>="3.5"']
+requires = ['Sphinx>=1.8']
 
 setup(
-    name='sphinxcontrib-pywave',
+    name='sphinxcontrib-pywaveform',
     use_scm_version={
         "relative_to": __file__,
         "write_to": "sphinxcontrib/version.py",
@@ -23,9 +22,11 @@ setup(
     packages=find_packages(exclude=['example']),
     include_package_data=True,
     install_requires=requires,
+    py_modules=["pywaveform"],
+    python_requires='>=3.5',
     setup_requires=[
         'setuptools_scm',
     ],
     namespace_packages=['sphinxcontrib'],
-    keywords = ['sphinx', 'pywave', 'documentation'],
+    keywords = ['sphinx', 'pywaveform', 'documentation'],
 )

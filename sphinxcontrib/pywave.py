@@ -16,7 +16,6 @@ from sphinx.util.fileutil import copy_asset_file
 from sphinx.locale import __
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.i18n import search_image_for_language
-from .executor import sh_exec
 
 import json
 
@@ -28,9 +27,6 @@ except ImportError:
 
 # pywave module
 import pywave
-
-# find the pywave tool in path
-PYWAVE_CMD = "pywave -f %s -i '%s' -o '%s'"
 
 class pywavenode(nodes.General, nodes.Inline, nodes.Element):
     """
@@ -164,13 +160,17 @@ def render_pywave(self, node, outpath, bname, file_format):
     if file_format == 'application/pdf':
         fname = "{}.{}".format(bname, "pdf")
         fpath = os.path.join(outpath, fname)
-        sh_exec(PYWAVE_CMD % ("cairo-pdf", "", fpath))
+        # input_path: str, output_path: str, file_format: str, is_reg: bool = False, dpi: float = 150.0
+        pywave.waveform.cli_main(
+            node['file'], fpath, "cairo-pdf", node['is_reg'])
         return fname
 
     if file_format == 'image/png':
         fname = "{}.{}".format(bname, "png")
         fpath = os.path.join(outpath, fname)
-        sh_exec(PYWAVE_CMD % ("cairo-png", "", fpath))
+        # input_path: str, output_path: str, file_format: str, is_reg: bool = False, dpi: float = 150.0
+        pywave.waveform.cli_main(
+            node['file'], fpath, "cairo-png", node['is_reg'])
         return fname
 
     raise SphinxError("No valid wavedrom conversion supplied")
